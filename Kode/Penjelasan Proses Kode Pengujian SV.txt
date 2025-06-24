@@ -1,0 +1,36 @@
+Penjelasan Proses Kode Pengujian SVM dan SMOTE
+Tujuan dari kode ini adalah untuk melakukan klasifikasi dan prediksi risiko stroke menggunakan data rekam medis pasien. Proses ini menggunakan algoritma Support Vector Machine (SVM) dan mengatasi masalah ketidakseimbangan data dengan teknik Synthetic Minority Over-sampling Technique (SMOTE).
+
+Berikut adalah tahapan prosesnya:
+
+1. Persiapan dan Pengambilan Data
+Pustaka (Libraries): Kode dimulai dengan mengimpor semua pustaka yang diperlukan untuk analisis, seperti pandas untuk manipulasi data, scikit-learn untuk pemodelan dan evaluasi, imblearn untuk SMOTE, serta matplotlib dan seaborn untuk visualisasi data.
+Akses Data: Data diambil dari file CSV (healthcare-dataset-stroke-data.csv) yang disimpan di Google Drive. Awalnya, data dibaca dengan pemisah (delimiter) default, yang menyebabkan semua kolom terbaca sebagai satu kesatuan. Masalah ini kemudian diperbaiki dengan membaca ulang file dan menentukan delimiter=';'.
+2. Pra-pemrosesan Data (Data Preprocessing)
+Langkah ini bertujuan untuk membersihkan dan mentransformasi data mentah agar siap digunakan untuk melatih model.
+
+Seleksi Fitur: Kolom id tidak diikutsertakan dalam analisis karena tidak relevan untuk prediksi. Kolom yang dipilih adalah gender, age, bmi, dan atribut klinis lainnya.
+Penanganan Nilai Kosong (Missing Values): Kode mengidentifikasi bahwa kolom bmi memiliki 201 nilai yang kosong (NaN). Nilai-nilai kosong ini diisi menggunakan nilai rata-rata (mean) dari kolom bmi itu sendiri. Setelah proses ini, tidak ada lagi nilai kosong dalam dataset yang dipilih.
+Encoding Data Kategorikal: Fitur yang bersifat teks (kategorikal) seperti gender, work_type, dan smoking_status tidak bisa langsung diolah oleh model SVM. Oleh karena itu, data ini diubah menjadi format numerik menggunakan dua teknik:
+Label Encoding: Digunakan untuk kolom biner seperti ever_married dan Residence_type.
+One-Hot Encoding: Digunakan untuk kolom dengan lebih dari dua kategori seperti gender dan work_type untuk menghindari bias urutan.
+Normalisasi Data: Fitur-fitur numerik seperti age, avg_glucose_level, dan bmi memiliki rentang nilai yang berbeda. Untuk menyeragamkan skala data, diterapkan Min-Max Scaling yang mengubah rentang nilai menjadi antara 0 dan 1.
+3. Penyeimbangan Data dengan SMOTE
+Identifikasi Ketidakseimbangan: Sebelum penyeimbangan, data target (stroke) sangat tidak seimbang, dengan 4.861 data untuk kelas 0 (tidak stroke) dan hanya 249 data untuk kelas 1 (stroke). Kondisi ini dapat menyebabkan model cenderung memprediksi kelas mayoritas.
+Penerapan SMOTE: Untuk mengatasi masalah ini, teknik SMOTE digunakan. SMOTE bekerja dengan membuat sampel data sintetis untuk kelas minoritas (stroke) hingga jumlahnya seimbang dengan kelas mayoritas. Setelah penerapan SMOTE, jumlah data untuk setiap kelas menjadi seimbang, yaitu 4.861 untuk kelas 0 dan 4.861 untuk kelas 1. Total data setelah proses ini menjadi 9.722 sampel.
+4. Pemodelan dan Evaluasi dengan SVM
+Setelah data bersih, seimbang, dan siap digunakan, kode melanjutkan ke tahap pemodelan menggunakan SVM dengan beberapa kernel berbeda.
+
+Pembagian Data: Dataset yang telah diseimbangkan (resampled) dibagi menjadi data latih (train) dan data uji (test) dengan proporsi yang berbeda-beda di setiap tahap pengujian (misalnya, 90:10 atau 80:20).
+
+Pengujian Kernel SVM:
+
+Kernel Linear: Model SVM dengan kernel linear dilatih dan dievaluasi. Hasilnya menunjukkan akurasi 94.52%, namun model ini gagal memprediksi kelas "stroke" (recall 0.00).
+Kernel RBF (Radial Basis Function): Model ini dievaluasi dengan beberapa kombinasi parameter C dan gamma. Salah satu pengujian dengan C=100 dan gamma=1 (tanpa SMOTE) menghasilkan akurasi 96.28% dengan recall untuk kelas "stroke" sebesar 0.36. Pengujian lain dengan data SMOTE menunjukkan akurasi 82.63% dengan recall yang jauh lebih baik untuk kelas "stroke" (0.89).
+Kernel Polynomial: Model ini diuji untuk melihat kemampuannya dalam menangani data non-linear. Pengujian menunjukkan akurasi sebesar 83.65%.
+Kernel Sigmoid: Kernel ini juga diuji dan menghasilkan akurasi terendah, yaitu 55.94%.
+Evaluasi Kinerja: Kinerja setiap model diukur menggunakan beberapa metrik, termasuk:
+
+Akurasi: Persentase prediksi yang benar secara keseluruhan.
+Presisi, Recall, dan F1-Score: Metrik yang lebih detail untuk mengevaluasi performa pada setiap kelas.
+Confusion Matrix: Digunakan untuk memvisualisasikan performa model dalam membedakan kelas "stroke" dan "tidak stroke".
